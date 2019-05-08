@@ -47,4 +47,6 @@ using (var fileStream = File.Create(installPath + @"\ExcelSimple\1.xlsx"))
 }
 ```
 #Excel Template
+![alt text](https://raw.githubusercontent.com/robert-luoqing/ExcelTemplate/master/Images/excel-template-source.png)
 #Convert Excel
+![alt text](https://raw.githubusercontent.com/robert-luoqing/ExcelTemplate/master/Images/excel-template-dist.png)
