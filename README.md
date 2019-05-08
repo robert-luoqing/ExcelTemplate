@@ -13,3 +13,38 @@ The value surround "{!" and "!}"
 for example, the first cell of row has "2-m", the other cell has path "{{test[m].name}}"
 if the test has 3 item, the first two row will be replace as test[0].name, the second will be test[1].name
 
+# Code Sample
+```c#
+var myClass = new Class();
+myClass.ClassName = "Class Four";
+myClass.Teacher = "Robert.R";
+myClass.Students = new List<Student>();
+myClass.Students.Add(new Student()
+{
+    Name="Sharon",
+    Age=12,
+    Gender="Female",
+    Score = 70
+});
+
+myClass.Students.Add(new Student()
+{
+    Name = "Robert",
+    Age = 13,
+    Gender = "Male",
+    Score = 65
+});
+
+var installExecuteFile = Assembly.GetExecutingAssembly().Location;
+var fileInfo = new FileInfo(installExecuteFile);
+var installPath = fileInfo.Directory.FullName;
+
+var stream = ExcelTemplateHelper.HandleExcel(installPath+@"\ExcelSimple\Simple.xlsx", myClass);
+using (var fileStream = File.Create(installPath + @"\ExcelSimple\1.xlsx"))
+{
+    stream.Seek(0, SeekOrigin.Begin);
+    stream.CopyTo(fileStream);
+}
+```
+#Excel Template
+#Convert Excel
