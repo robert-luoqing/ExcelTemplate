@@ -1,3 +1,8 @@
 **/packages/*.*
 obj
 bin
+Code/.vs/ExcelTemplate/v15/.suo
+Code/.vs/ExcelTemplate/v15/Server/sqlite3/db.lock
+Code/.vs/ExcelTemplate/v15/Server/sqlite3/storage.ide
+Code/.vs/ExcelTemplate/v15/Server/sqlite3/storage.ide-shm
+Code/.vs/ExcelTemplate/v15/Server/sqlite3/storage.ide-wal
