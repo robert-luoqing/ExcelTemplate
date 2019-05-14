@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 
 namespace ExcelTemplateLib
 {
+
     public static class ExcelTemplateHelper
     {
         public static Stream HandleExcel(string fullFilePath, object obj)
@@ -41,7 +42,7 @@ namespace ExcelTemplateLib
                     // if the test has 3 item, the first two row will be replace as test[0].name, the second will be test[1].name
                     if (cells.Count > 0)
                     {
-                        var firstCellValue = cells[0].StringCellValue;
+                        var firstCellValue = cells[0].ToString();
                         var matched = GetLoopMark(firstCellValue);
                         if (matched == null)
                         {
@@ -88,15 +89,26 @@ namespace ExcelTemplateLib
                                 }
                             }
 
-                            // remove row from excel if loop index equal zore
+
                             if (loopCount == 0)
                             {
-                                rowIndex = startLoopRowIndex - 1;
-                                rowCount -= lineCount;
+                                // remove row from excel if loop index equal zore
+                                //rowIndex = startLoopRowIndex - 1;
+                                //rowCount -= lineCount;
+                                //for (int i = startLoopRowIndex; i < startLoopRowIndex + lineCount; i++)
+                                //{
+                                //    RemoveRow(sheet,i);
+                                //}
+
+                                // keep blank cell in the row
                                 for (int i = startLoopRowIndex; i < startLoopRowIndex + lineCount; i++)
                                 {
-                                    sheet.RemoveRow(sheet.GetRow(i));
+                                    var blankCells = GetCellsFromRow(sheet, i);
+                                    foreach (var cell in blankCells)
+                                        cell.SetCellValue("");
                                 }
+
+                                rowIndex += lineCount - 1;
                             }
                             else
                             {
@@ -124,7 +136,7 @@ namespace ExcelTemplateLib
                                     }
                                 }
 
-                                rowIndex += (loopCount - 1) * lineCount;
+                                rowIndex += loopCount * lineCount - 1;
                                 rowCount += (loopCount - 1) * lineCount;
 
                                 // fill data 
@@ -149,7 +161,15 @@ namespace ExcelTemplateLib
                 wk.Close();
             }
 
+            result.Seek(0, SeekOrigin.Begin);
+
             return result;
+        }
+
+        private static void RemoveRow(ISheet sheet, int rowIndex)
+        {
+            sheet.RemoveRow(sheet.GetRow(rowIndex));
+            sheet.ShiftRows(rowIndex + 1, sheet.LastRowNum, -1, true, true);
         }
 
         private static void InsertAndCopyRow(ISheet sheet, int sourceRowIndex, int destRowIndex)
@@ -176,7 +196,7 @@ namespace ExcelTemplateLib
                 {
                     targetCell.CellStyle = sourceCell.CellStyle;
                     targetCell.SetCellType(sourceCell.CellType);
-                    targetCell.SetCellValue(sourceCell.StringCellValue);
+                    targetCell.SetCellValue(sourceCell.ToString());
                 }
             }
         }
@@ -229,7 +249,7 @@ namespace ExcelTemplateLib
             var results = new List<string>();
             foreach (var cellObj in cellObjs)
             {
-                var cellData = cellObj.StringCellValue;
+                var cellData = cellObj.ToString();
                 var propPaths = GetPropPathFromInput(cellData);
                 results.AddRange(propPaths);
             }
@@ -244,7 +264,7 @@ namespace ExcelTemplateLib
         /// <param name="obj">绑定的对象</param>
         private static void HandleCellData(ICell cellObj, object obj)
         {
-            var cellData = cellObj.StringCellValue;
+            var cellData = cellObj.ToString();
             if (!string.IsNullOrWhiteSpace(cellData))
             {
                 var propPaths = GetPropPathFromInput(cellData);
@@ -252,9 +272,9 @@ namespace ExcelTemplateLib
                 foreach (var propPath in propPaths)
                 {
                     var parsedContent = ObjectPathParser.GetDeepPropertyValue(obj, propPath);
-                    if (parsedContent != null)
+                    if (isSingleProperty)
                     {
-                        if (isSingleProperty)
+                        if (parsedContent != null)
                         {
                             if (parsedContent is DateTime)
                             {
@@ -271,12 +291,12 @@ namespace ExcelTemplateLib
                         }
                         else
                         {
-                            cellData = cellData.Replace("{{" + propPath + "}}", parsedContent.ToString());
+                            cellObj.SetCellValue("");
                         }
                     }
                     else
                     {
-                        cellData = cellData.Replace("{{" + propPath + "}}", "");
+                        cellData = cellData.Replace("{{" + propPath + "}}", parsedContent == null ? "" : parsedContent.ToString());
                     }
                 }
 
@@ -293,7 +313,7 @@ namespace ExcelTemplateLib
         /// <param name="obj">绑定的对象</param>
         private static void HandleCellData(ICell cellObj, object obj, string loopFlag, int index)
         {
-            var cellData = cellObj.StringCellValue;
+            var cellData = cellObj.ToString();
 
             if (!string.IsNullOrWhiteSpace(cellData))
             {
